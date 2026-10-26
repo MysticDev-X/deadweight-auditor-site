@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="pt-PT">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Metodologia — DeadWeight Auditor</title>
+    <meta
+      name="description"
+      content="Como o DeadWeight Auditor classifica pedidos, mede repetições, compara com bloqueio e calcula a estimativa em euros."
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="./index.html">DeadWeight Auditor</a>
+      <nav aria-label="Principal">
+        <a href="./methodology.html" aria-current="page">Metodologia</a>
+        <a href="./privacy.html">Privacidade</a>
+      </nav>
+    </header>
+
+    <main class="prose">
+      <h1>Metodologia</h1>
+      <p class="muted">Versão 0.2.0 · núcleo determinístico em Rust/WASM</p>
+
+      <p>
+        Este documento descreve o que o produto calcula. Se o código e esta página divergirem, o
+        código está errado. O núcleo é determinístico e testado com <code>cargo test</code> fora do
+        browser.
+      </p>
+
+      <h2>1. First party e third party</h2>
+      <p>
+        O host do pedido é comparado com o eTLD+1 da página, calculado com a Public Suffix List.
+        <code>cdn.loja.pt</code> é first party; <code>connect.facebook.net</code> é third party.
+        Portas e caminhos não contam. Esquemas que não sejam HTTP/HTTPS são descartados.
+      </p>
+
+      <h2>2. Vendors</h2>
+      <p>
+        A base tem 82 vendors e é validada no arranque: ids e domínios duplicados, regex inválida,
+        risco fora de 1–5 ou proveniência em falta impedem a análise. O match é por host (igual ou
+        sufixo com fronteira de label), opcionalmente por prefixo de path e por padrões lineares
+        (<code>regex-lite</code>, sem backtracking). Ganha o match mais específico; empates são
+        resolvidos pelo id.
+      </p>
+      <p>
+        A base é uma compilação original de factos de domínio. As fontes públicas consultadas para
+        descoberta e as suas licenças estão em
+        <code>NOTICE.md</code>. O uso comercial exige licenciamento próprio dessas fontes ou uma
+        base re-derivada; o estado da revisão é explícito no ficheiro de dados.
+      </p>
+
+      <h2>3. Métricas</h2>
+      <ul>
+        <li>
+          <strong>LCP, CLS, TTFB e load</strong> vêm do browser, via PerformanceObserver e
+          Navigation Timing.
+        </li>
+        <li><strong>TBT</strong> é a soma do excesso acima de 50 ms das long tasks.</li>
+        <li>
+          <strong>Bytes</strong> usam <code>transferSize</code>; sem Timing-Allow-Origin em
+          terceiros, usa-se <code>decodedBodySize</code> como aproximação.
+        </li>
+        <li>
+          <strong>Bloqueio por script</strong> é uma heurística: o TBT é repartido pelos scripts de
+          terceiros em proporção aos bytes. O browser não expõe tempo de execução por script;
+          dizemo-lo no relatório.
+        </li>
+      </ul>
+
+      <h2>4. Repetições</h2>
+      <p>
+        O modo de evidência recarrega a página N vezes (1–5; 3 por omissão) e calcula mínimo,
+        mediana e máximo por métrica. A mediana de um número par é a média dos dois valores
+        centrais. A execução guardada é a que tem o LCP mais próximo da mediana (ou o TBT, se não
+        houver LCP); empates ficam com o menor índice. Assim, a waterfall e o PDF correspondem a um
+        carregamento real.
+      </p>
+      <p>
+        Antes de medir, a extensão espera pelo evento <code>complete</code> e deixa 2,5 s para
+        LCP/CLS tardios e long tasks finais. Se o <code>complete</code> não chegar em 30 s, a
+        execução é incluída com um aviso — nunca apresentada como completa.
+      </p>
+
+      <h2>5. Comparação com bloqueio</h2>
+      <p>
+        A linha de base e a variante são medidas com <code>bypassCache</code>
+        ativo nos dois lados. Na variante, o Chrome bloqueia, apenas nesse separador, os hosts dos
+        vendors observados na linha de base (<code>declarativeNetRequestWithHostAccess</code>). O
+        delta é sempre
+        <strong>variante − base</strong>: negativo significa menos tempo, bytes ou pedidos. As
+        regras são removidas num <code>finally</code>, varridas no arranque do worker, e a página é
+        recarregada sem bloqueios no fim.
+      </p>
+      <p>
+        Isto é evidência direcional local, não um teste A/B cego. Bloquear um vendor remove também
+        funções úteis e pode partir a página; três execuções reduzem ruído, mas não eliminam
+        variância de rede, cache, hora ou geografia.
+      </p>
+
+      <h2>6. Estimativa em euros</h2>
+      <pre><code>fator_mobile  = 1 + mobile_share × (mobile_multiplier − 1)
+coef_efetivo  = coeficiente_do_cenário × fator_mobile
+perda_por_sessão = (atraso_ms / 100) × coef_efetivo
+                   × taxa_conversão × valor_médio_encomenda
+perda_mensal  = perda_por_sessão × sessões_mensais
+teto          = sessões_mensais × taxa_conversão × valor_médio_encomenda
+perda_final   = min(perda_mensal, teto)</code></pre>
+      <p>
+        Três cenários (conservador, provável, otimista) são ordenados no núcleo. Sem parâmetros de
+        negócio não há estimativa: a UI mostra só métricas técnicas. Os coeficientes são
+        pressupostos editáveis, não factos medidos; vêm de literatura observacional (por exemplo,
+        Deloitte/Google, «Milliseconds Make Millions»). Correlação não é causalidade.
+      </p>
+
+      <h2>7. Nota A–F e CO₂</h2>
+      <p>
+        A nota é uma heurística de comunicação:
+        <code
+          >penalty = 1,5×pedidos + 2,0×(KB/100) + 3,0×(bloqueio/100) + 3,0×vendors de risco ≥ 4 +
+          4,0×session replay</code
+        >, com <code>score = clamp(100 − penalty, 0, 100)</code>. O CO₂ é
+        <code>(bytes / 1e6) × 0,8 gCO₂e/MB</code>, um indicador aproximado, não uma medição.
+      </p>
+
+      <h2>8. O que não é</h2>
+      <p>
+        Não é uma auditoria legal, fiscal ou financeira. Não prova que remover um script aumenta a
+        conversão. Não vê pedidos que o browser não expõe nem vendors fora da base. Não substitui um
+        teste A/B controlado.
+      </p>
+    </main>
+
+    <footer class="site-footer">
+      <p>© 2026 DeadWeight Auditor. Software proprietário.</p>
+    </footer>
+  </body>
+</html>

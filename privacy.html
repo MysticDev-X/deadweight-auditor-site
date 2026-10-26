@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="pt-PT">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Política de privacidade — DeadWeight Auditor</title>
+    <meta
+      name="description"
+      content="Política de privacidade do DeadWeight Auditor: tudo fica no browser, sem telemetria, sem servidor, sem código remoto."
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="./index.html">DeadWeight Auditor</a>
+      <nav aria-label="Principal">
+        <a href="./methodology.html">Metodologia</a>
+        <a href="./privacy.html" aria-current="page">Privacidade</a>
+      </nav>
+    </header>
+
+    <main class="prose">
+      <h1>Política de privacidade</h1>
+      <p class="muted">Versão 0.2.0 · 26 de outubro de 2026</p>
+
+      <p>
+        Em linguagem simples: <strong>nada do que a extensão vê sai do teu browser.</strong> Não há
+        conta, servidor nosso, telemetria, analytics ou código remoto.
+      </p>
+
+      <h2>O que a extensão faz</h2>
+      <p>
+        Quando pedes uma análise a uma página, a extensão observa os pedidos de rede desse
+        separador, mede tempos e tamanhos, identifica scripts de terceiros e atribui-os a vendors
+        conhecidos. Se ativares os parâmetros de negócio, calcula uma estimativa de receita perdida
+        — um modelo, não uma medição contabilística.
+      </p>
+
+      <h2>O que é guardado, e onde</h2>
+      <p>Tudo fica no teu computador, dentro do perfil do Chrome:</p>
+      <ul>
+        <li>
+          <strong>IndexedDB</strong> — sessões: origem e URL da página, data, pedidos observados
+          (URL, tipo, tamanho, tempos), métricas (LCP, TBT, CLS, TTFB, load), cookies e chaves de
+          storage de terceiros observados, resultados, resumo das repetições e comparação local.
+        </li>
+        <li>
+          <strong>chrome.storage.local</strong> — preferências: parâmetros de negócio, tema e opções
+          de captura.
+        </li>
+      </ul>
+      <p>Não existe sincronização nem backup para os nossos sistemas.</p>
+
+      <h2>O que nunca acontece</h2>
+      <ul>
+        <li>Nenhuma telemetria, evento, crash report ou identificador é enviado.</li>
+        <li>Nenhum código remoto: todo o JavaScript e WebAssembly vem do pacote instalado.</li>
+        <li>Nenhuma venda ou partilha de dados — não há dados para vender.</li>
+        <li>
+          Nenhuma leitura fora do separador que pediste para analisar, exceto com as permissões
+          opcionais abaixo.
+        </li>
+      </ul>
+
+      <h2>Permissões, uma a uma</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Permissão</th>
+            <th>Para quê</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>activeTab</code></td>
+            <td>Acesso temporário ao separador onde clicas em Analisar, só depois do clique.</td>
+          </tr>
+          <tr>
+            <td><code>scripting</code></td>
+            <td>Injetar o coletor de métricas nesse separador.</td>
+          </tr>
+          <tr>
+            <td><code>webRequest</code></td>
+            <td>Observar os pedidos do separador analisado, quando há permissão de host.</td>
+          </tr>
+          <tr>
+            <td><code>declarativeNetRequestWithHostAccess</code></td>
+            <td>
+              Bloquear temporariamente os domínios dos vendors já observados, apenas durante uma
+              comparação pedida por ti e apenas nesse separador. As regras são removidas no fim e no
+              arranque do service worker; a página é recarregada sem bloqueios.
+            </td>
+          </tr>
+          <tr>
+            <td><code>storage</code></td>
+            <td>Guardar preferências localmente.</td>
+          </tr>
+          <tr>
+            <td><code>sidePanel</code></td>
+            <td>Mostrar o diagnóstico no painel lateral.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Permissões opcionais</h3>
+      <p>
+        <strong>Permissão de host</strong> (<code>http://*/*</code> e <code>https://*/*</code>) —
+        necessária para ver pedidos de terceiros e para bloquear temporariamente os vendors na
+        comparação. É ampla, por isso é pedida em runtime, explicada no momento do pedido e
+        revogável em <code>chrome://extensions</code> → DeadWeight Auditor → Detalhes → Permissões
+        do site. Sem ela, a extensão funciona em modo reduzido com o que o
+        <code>PerformanceObserver</code> da página consegue medir.
+      </p>
+      <p>
+        <strong><code>cookies</code></strong> — ler cookies de hosts de terceiros já observados,
+        apenas quando carregas no botão de verificação no separador Privacidade. Sem esta permissão,
+        a extensão mostra apenas o que a página consegue ver.
+      </p>
+
+      <h2>Os teus dados, o teu controlo</h2>
+      <ul>
+        <li>Apagar todas as sessões e preferências nas opções da extensão.</li>
+        <li>Desinstalar a extensão: o Chrome remove os dados associados.</li>
+        <li>
+          Exportar uma sessão para PDF, CSV ou JSON. Os ficheiros ficam onde os guardares; a
+          extensão não os envia para lado nenhum.
+        </li>
+      </ul>
+
+      <h2>Sites analisados</h2>
+      <p>
+        A extensão não altera páginas, não injeta publicidade e não bloqueia pedidos fora do modo de
+        comparação. Nesse modo — iniciado por ti, num separador e por poucos segundos — os domínios
+        observados são bloqueados para medir o efeito, e a página é recarregada sem bloqueios no
+        fim.
+      </p>
+
+      <h2>Alterações</h2>
+      <p>
+        Qualquer alteração a esta política é publicada nesta página e no repositório do projeto, com
+        a data da versão. Não há versões “silenciosas”.
+      </p>
+
+      <h2>Contacto</h2>
+      <p>
+        Para questões de privacidade, usa o endereço de contacto publicado na página da Chrome Web
+        Store.
+      </p>
+    </main>
+
+    <footer class="site-footer">
+      <p>© 2026 DeadWeight Auditor. Software proprietário.</p>
+      <p class="muted">Esta página não carrega scripts, fontes ou imagens externas.</p>
+    </footer>
+  </body>
+</html>

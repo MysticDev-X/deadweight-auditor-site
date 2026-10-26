@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="pt-PT">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>DeadWeight Auditor — o custo real do código de terceiros</title>
+    <meta
+      name="description"
+      content="Diagnóstico local do custo de scripts de terceiros em e-commerce: bytes, atraso, privacidade e uma estimativa em euros, com evidência medida."
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="./index.html">DeadWeight Auditor</a>
+      <nav aria-label="Principal">
+        <a href="./methodology.html">Metodologia</a>
+        <a href="./privacy.html">Privacidade</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero">
+        <p class="eyebrow">Extensão Chrome · 100% local</p>
+        <h1>Quanto custa o código de terceiros na tua loja?</h1>
+        <p class="lede">
+          Mede bytes, bloqueio, privacidade e uma estimativa em euros — com repetições, comparação
+          local e todos os pressupostos à vista. Sem conta, sem servidor, sem telemetria.
+        </p>
+      </section>
+
+      <section class="grid" aria-label="O que faz">
+        <article class="card">
+          <h2>Mede o que a página carrega</h2>
+          <p>
+            Separa first party de third party, atribui pedidos a 82 vendors de e-commerce e mostra
+            LCP, TBT, CLS, TTFB, bytes e pedidos.
+          </p>
+        </article>
+        <article class="card">
+          <h2>Repete para não te enganares</h2>
+          <p>
+            Três carregamentos, mediana e amplitude. A sessão guardada é a execução mais próxima da
+            mediana, não uma média inventada.
+          </p>
+        </article>
+        <article class="card">
+          <h2>Compara com os vendors bloqueados</h2>
+          <p>
+            Recarrega a página com os domínios observados bloqueados, mede o delta e restaura a
+            página. Bloqueio temporário, limitado ao separador.
+          </p>
+        </article>
+      </section>
+
+      <section class="prose">
+        <h2>O que este produto é — e não é</h2>
+        <p>
+          É um <strong>diagnóstico técnico</strong>. A atribuição de bloqueio por script é uma
+          heurística documentada; o matcher é uma lista curada e pode não reconhecer vendors novos
+          ou CNAME cloaking.
+        </p>
+        <p>
+          A estimativa em euros é um <strong>modelo</strong> com três cenários e pressupostos
+          editáveis, baseado em estudos observacionais. Não é uma perda contabilística, uma
+          auditoria financeira ou uma prova de causalidade. A comparação com bloqueio é evidência
+          direcional local, não um teste A/B cego.
+        </p>
+        <p>
+          Tudo fica no perfil do Chrome. Podes apagar as sessões e as preferências nas opções. Lê a
+          <a href="./privacy.html">política de privacidade</a> e a
+          <a href="./methodology.html">metodologia</a>.
+        </p>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p>© 2026 DeadWeight Auditor. Software proprietário. Todos os direitos reservados.</p>
+      <p class="muted">
+        Os nomes dos vendors pertencem aos respetivos titulares. Este projeto não é afiliado nem
+        endossado por eles.
+      </p>
+    </footer>
+  </body>
+</html>
